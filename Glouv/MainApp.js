@@ -3,33 +3,54 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 
 export default function CronometroScreen() {
-  const sonidoRef = useRef(null);
+  const sonidoLocalRef = useRef(null);
+  const sonidoRemotoRef = useRef(null);
 
   useEffect(() => {
-    const cargarSonido = async () => {
+    const cargarSonidoLocal = async () => {
       const { sound } = await Audio.Sound.createAsync(
         require('./assets/sonidoCampa.mp3')
       );
-      sonidoRef.current = sound;
+      sonidoLocalRef.current = sound;
     };
 
-    cargarSonido();
+    const cargarSonidoRemoto = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+        { shouldPlay: false }
+      );
+      sonidoRemotoRef.current = sound;
+    };
+
+    cargarSonidoLocal();
+    cargarSonidoRemoto();
 
     return () => {
-      if (sonidoRef.current) sonidoRef.current.unloadAsync();
+      if (sonidoLocalRef.current) sonidoLocalRef.current.unloadAsync();
+      if (sonidoRemotoRef.current) sonidoRemotoRef.current.unloadAsync();
     };
   }, []);
 
-  const reproducirSonido = async () => {
-    if (sonidoRef.current) {
-      await sonidoRef.current.replayAsync();
+  const reproducirSonidoLocal = async () => {
+    if (sonidoLocalRef.current) {
+      await sonidoLocalRef.current.replayAsync();
+    }
+  };
+
+  const reproducirSonidoRemoto = async () => {
+    if (sonidoRemotoRef.current) {
+      await sonidoRemotoRef.current.replayAsync();
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.boton} onPress={reproducirSonido}>
-        <Text style={styles.textoBoton}>Reproducir sonido</Text>
+      <TouchableOpacity style={styles.boton} onPress={reproducirSonidoLocal}>
+        <Text style={styles.textoBoton}>Sonido Local</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.boton, { marginTop: 20 }]} onPress={reproducirSonidoRemoto}>
+        <Text style={styles.textoBoton}>Sonido Remoto</Text>
       </TouchableOpacity>
     </View>
   );
